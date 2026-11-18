@@ -1,0 +1,27 @@
+# A pretend project whose tests sometimes fail for no reason, so we can watch the triage work.
+# Run it from the Actions tab ("Run workflow") and choose a mode:
+#   flaky  = fails about 40% of the time on the first attempt, never on a re-run   (a fluke)
+#   broken = always fails                                                           (a real failure)
+name: Demo flaky CI
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "flaky or broken"
+        default: "flaky"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pretend to run the tests
+        run: |
+          echo "running tests..."; sleep 20
+          MODE="${{ github.event.inputs.mode || 'flaky' }}"
+          if [ "$MODE" = "broken" ]; then echo "ERROR: assertion failed in test_checkout"; exit 1; fi
+          if [ "${{ github.run_attempt }}" = "1" ] && [ $((RANDOM % 5)) -lt 2 ]; then
+            echo "ERROR: connection reset by peer"; exit 1
+          fi
+          echo "all tests passed"
