@@ -1,0 +1,67 @@
+{
+  "trained_at": "2026-11-17T09:43:48+00:00",
+  "model": "logistic regression on feature groups history+run, Platt-calibrated",
+  "n_training_jobs": 2370,
+  "n_projects": 25,
+  "projects": [
+    "App-vNext/Polly",
+    "PaddlePaddle/Paddle",
+    "PrestaShop/PrestaShop",
+    "RocketChat/Rocket.Chat",
+    "Wei-Shaw/sub2api",
+    "audacity/audacity",
+    "bagisto/bagisto",
+    "dmlc/xgboost",
+    "doorkeeper-gem/doorkeeper",
+    "facebookresearch/faiss",
+    "fastlane/fastlane",
+    "hashicorp/consul",
+    "herdrdev/herdr",
+    "juspay/hyperswitch",
+    "meteor/meteor",
+    "netbirdio/netbird",
+    "netty/netty",
+    "paperclipai/paperclip",
+    "prometheus/prometheus",
+    "strapi/strapi",
+    "swc-project/swc",
+    "ultralytics/ultralytics",
+    "vectorize-io/hindsight",
+    "vercel/next.js",
+    "woocommerce/woocommerce"
+  ],
+  "share_flaky": 0.7502,
+  "features": [
+    "repo_n_1h",
+    "repo_fail_1h",
+    "repo_n_24h",
+    "repo_fail_24h",
+    "repo_fail_rate_24h",
+    "wf_n_7d",
+    "wf_fail_7d",
+    "wf_fail_rate_7d",
+    "n_failed_jobs_in_run"
+  ],
+  "library_versions": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.1.1",
+    "joblib": "1.6.0"
+  },
+  "dataset_raw_sha256": "d4726f99603316a77010c03cd8d073b3a412edf0b0c8c988c012eea0c23369f2",
+  "out_of_fold_scores_unseen_projects": {
+    "pr_auc_real_failures": 0.379,
+    "roc_auc": 0.652,
+    "brier_raw": 0.178,
+    "brier_calibrated": 0.177,
+    "ece_calibrated": 0.024
+  },
+  "decision_rule": "re-run if p > (1+W)d / (X+(1+W)d); defaults X=15, W=1, d = job minutes",
+  "limitations": [
+    "trained only on jobs that someone re-ran (selection bias)",
+    "25 projects, about two months of data",
+    "labels are heuristic (passed on re-run = flaky)",
+    "feature group chosen after looking at test results"
+  ]
+}
