@@ -1,0 +1,49 @@
+# Runs when the watched workflow finishes. Only acts if it FAILED.
+# NOTE: for a `workflow_run` trigger, this file must be on the repository's default branch.
+name: CI failure triage
+
+on:
+  workflow_run:
+    workflows: ["Demo flaky CI"]      # <-- put the name(s) of the workflow(s) to watch here
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: write          # needed to re-run failed jobs
+  pull-requests: write    # needed to comment on a pull request
+
+jobs:
+  triage:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install (same library versions as training)
+        run: pip install -r model/requirements.lock.txt -r requirements-serve.txt
+
+      - name: Start the triage API on this runner
+        run: |
+          nohup python -m uvicorn api:app --host 127.0.0.1 --port 8000 > api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 1; done
+          curl -sf http://127.0.0.1:8000/health
+
+      - name: Triage the failed run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          TRIAGE_X: ${{ vars.TRIAGE_X || '15' }}
+          AUTO_RERUN: ${{ vars.AUTO_RERUN || 'false' }}     # keep 'false' until you trust it
+        run: python triage_action.py
+
+      - name: Keep the API log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-log
+          path: api.log
